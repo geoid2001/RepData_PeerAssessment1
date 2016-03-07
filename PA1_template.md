@@ -119,7 +119,7 @@ It turns out that 53 of 61 days have countable data Here we make a histogram of 
 histogram(~steps,data=DailySteps_withoutNA, xlab="Total Daily Steps",breaks=25, type="count",ylab="count (days)",main="Histogram of Total Number of Steps Taken Each Day")
 ```
 
-![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Histogram_TotDailySteps_woNAs.png](PA1_template_files/figure-markdown_github/unnamed-chunk-7-1.png)<!-- --> The mean total number of steps taken per day rounded to whole number steps is
+![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Histogram_TotDailySteps_woNAs.png](https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Avg_Number_Steps_5min_woNAs.png)<!-- --> The mean total number of steps taken per day rounded to whole number steps is
 
 ``` r
 round(mean(DailySteps_withoutNA[,steps]),0)
@@ -146,7 +146,7 @@ MeanStepsByInterval_withoutNA<- activity_data[, list(mean=mean(steps,na.rm=TRUE)
 xyplot(mean ~ interval, data=MeanStepsByInterval_withoutNA, type="l", xlim=c(0,2400),scales=list(x=list(at=seq(0,2400,200))),grid=TRUE,ylab="Average Number of steps", xlab="5-minute intervals following midnight\nNote: Data only in first 60 minutes of each 100 minute interval", main="Average number of steps by 5-minutes intervals")
 ```
 
-![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Avg_Number_Steps_5min_woNAs.png](PA1_template_files/figure-markdown_github/unnamed-chunk-10-1.png)<!-- --> Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? The max number of step occurs at 835 as obtained with the command
+![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Avg_Number_Steps_5min_woNAs.png](https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Avg_Number_Steps_5min_woNAs.png)<!-- --> Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? The max number of step occurs at 835 as obtained with the command
 
 ``` r
 MeanStepsByInterval_withoutNA[order(-rank(mean)),interval][1]
@@ -198,7 +198,7 @@ DailySteps_withNA<- activity_data[, lapply(.SD, sum), by = date]
 histogram(~steps,data=DailySteps_withNA, xlab="Total Daily Steps",breaks=25, type="count",ylab="count (days)",main="Histogram of Total Number of Steps Taken Each Day\nUpon Replacement of NAs with the mean of the 5-minute interval data")
 ```
 
-![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Hist_Total_Steps_reNAs_mean_5min.png](PA1_template_files/figure-markdown_github/unnamed-chunk-14-1.png)<!-- --> Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Hist_Total_Steps_reNAs_mean_5min.png](https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/Avg_Number_Steps_5min_woNAs.png)<!-- --> Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 The mean total number of steps taken upon replacement of NAs per day rounded to whole number steps is
 
