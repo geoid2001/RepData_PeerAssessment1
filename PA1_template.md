@@ -228,6 +228,6 @@ MeanStepsByInterval_byDayType<- activity_data[, list(mean=mean(steps,na.rm=TRUE)
 xyplot(mean ~ interval | dayType, data=MeanStepsByInterval_byDayType, type="l", xlim=c(0,2400),scales=list(x=list(at=seq(0,2400,200))),grid=TRUE,layout=c(1,2),ylab="Average Number of steps", xlab="5-minute intervals following midnight\nNote: Data only in first 60 minutes of each 100 minute interval", main="Average number of steps splitting Weekdays and Weekends\nby 5-minutes intervals with NAs Replaced")
 ```
 
-![https://github.com/geoid2001/RepData_PeerAssessment1/blob/master/instructions_fig/ave_steps_weekday_weekends.png](PA1_template_files/figure-markdown_github/unnamed-chunk-17-1.png)<!-- -->
+![RepData_PeerAssessment1/instructions_fig/ave_steps_weekday_weekends.png](RepData_PeerAssessment1/instructions_fig/ave_steps_weekday_weekends.png)<!-- -->
 
 The number of steps is concentrated in the morning for weekdays whereas the number of steps in any given interval is smaller on the weekends and is spread through normal daily hours.
