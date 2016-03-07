@@ -1,25 +1,136 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Elliot Klein"
+date: "March 6, 2016"
 output: 
-  html_document:
-    keep_md: true
+html_document:
+keep_md: true
 ---
 
 
-## Loading and preprocessing the data
+### This script is to fulfill Assignment: Course Project 1, for the Coursera course, Reproducible Research by Johns Hopkins University, offered in March, 2016
 
 
+####  Introduction:
 
-## What is mean total number of steps taken per day?
+It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the “quantified self” movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized  both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
 
-
-
-## What is the average daily activity pattern?
-
+ This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 
-## Imputing missing values
+#### Are there differences in activity patterns between weekdays and weekends?
+
+clear workspace too prevent introducing error and ad libraries needed in this script outputing associated library warnings
+``` {r, echo = TRUE}
+rm(list=ls()) 
+library(data.table)
+library(lubridate)
+library(lattice)
+```
+The assignment template was forked from the Github account of Course instructor Roger Peng : https://github.com/rdpeng/RepData_PeerAssessment1
+
+The data shown here were processed and analyzed beginning on `r now()` using `r version$version.string`
+
+Set Path to working directory and create data directory if neededd
+``` {r, echo = TRUE}
+setPath <- "/Users/geoid2001/downloads"
+setwd(setPath)
+if(!file.exists("./data")){dir.create("./data")}
+```
+Unzip DataSet to /data directory if data is not yet there
+``` {r, echo = TRUE}
+unzip(zipfile="repdata-data-activity.zip",exdir="./data")
+```
+#### Loading and preprocessing the data
+load the data. I load raw dataset with fread from data.table library amd make sure we know we have data completely loaded and identified by applying commands str, str, dim, head, and tail on the loaded data
+``` {r, echo = TRUE}
+activity_data <- fread("data/activity.csv")
+str(activity_data)
+names(activity_data)
+dim(activity_data)
+head(activity_data)
+tail(activity_data)
+```  
+Process/transform the data (if necessary) into a format suitable for your analysis
+It is useful to breakdown interval into hour and minute using element by element divsion, %/% for hours, and the modulus operator, && for minutes. 
+``` {r, echo = TRUE}
+activity_data[,hr:=interval %/% 100]
+activity_data[,min:=interval %% 100]
+activity_data[,DATETIME:=ymd_hm(paste(date,hr,min))]
+
+```
+
+#### What is mean total number of steps taken per day?
+For this part of the assignment, you can ignore the missing values in the dataset.
+Use lapply with data.table to sum step per day
+``` {r, echo = TRUE}
+DailySteps_withNA<- activity_data[, lapply(.SD, sum), by = date]
+DailySteps_withoutNA<- DailySteps_withNA[!is.na(steps),list(steps)]  # remove missing values
+```
+It turns out that 53 of 61 days have countable data
+Here we make a histogram of the total number of steps taken each day
+``` {r, echo = TRUE}
+histogram(~steps,data=DailySteps_withoutNA, xlab="Total Daily Steps",breaks=25, type="count",ylab="count (days)",main="Histogram of Total Number of Steps Taken Each Day")
+```
+The mean total number of steps taken per day rounded to whole number steps is
+``` {r, echo = TRUE}
+round(mean(DailySteps_withoutNA[,steps]),0)
+```
+The median total number of steps taken per day rounded to whole number steps is
+``` {r, echo = TRUE}
+round(median(DailySteps_withoutNA[,steps]),0)
+```
+#### What is the average daily activity pattern?
+Make a time series plot (i.e. 𝚝𝚢𝚙𝚎 = "𝚕") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+``` {r, echo = TRUE}
+MeanStepsByInterval_withoutNA<- activity_data[, list(mean=mean(steps,na.rm=TRUE)), by = interval]
 
 
+xyplot(mean ~ interval, data=MeanStepsByInterval_withoutNA, type="l", xlim=c(0,2400),scales=list(x=list(at=seq(0,2400,200))),grid=TRUE,ylab="Average Number of steps", xlab="5-minute intervals following midnight\nNote: Data only in first 60 minutes of each 100 minute interval", main="Average number of steps by 5-minutes intervals")
+```
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? The max number of step occurs at `r MeanStepsByInterval_withoutNA[order(-rank(mean)),interval][1]` as obtained with the command
+``` {r, echo = TRUE}
+MeanStepsByInterval_withoutNA[order(-rank(mean)),interval][1]
+```
+#### Imputing missing values
+I find the total number of missing values in the dataset (i.e. the total number of rows with 𝙽𝙰s)
+is `r sum(is.na(activity_data[,steps]))`, for the steps data using the command 
+``` {r, echo = TRUE}
+sum(is.na(activity_data[,steps]))
 
-## Are there differences in activity patterns between weekdays and weekends?
+```
+The other date and interval do not contain NA entries
+``` {r, echo = TRUE}
+sum(is.na(activity_data[,date]))
+sum(is.na(activity_data[,interval]))
+```
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+To me it makes sense to us the mean of the 5-minute interval data
+``` {r, echo = TRUE}
+activity_data[is.na(steps) & interval==MeanStepsByInterval_withoutNA[,interval], steps:=round(MeanStepsByInterval_withoutNA[,mean],0)]
+DailySteps_withNA<- activity_data[, lapply(.SD, sum), by = date]
+histogram(~steps,data=DailySteps_withNA, xlab="Total Daily Steps",breaks=25, type="count",ylab="count (days)",main="Histogram of Total Number of Steps Taken Each Day\nUpon Replacement of NAs with the mean of the 5-minute interval data")
+```
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+The mean total number of steps taken upon replacement of NAs per day rounded to whole number steps is
+``` {r, echo = TRUE}
+round(mean(DailySteps_withNA[,steps]),0)
+```
+The median total number of steps taken upon replacement of NAs per day rounded to whole number steps is
+``` {r, echo = TRUE}
+round(median(DailySteps_withNA[,steps]),0)
+```
+The mean is the same if we replace or don't replace the NAs with the mean 5-minute interval. The median is just 3 steps less out of 10765 if we replace the NAs with the mean 5-minute interval. This very insigficant fraction is likely in smaller than the uncertainties in the data collection itself, so using the the mean 5-minute interval as replacement for NA has no impact on the analysis
+
+#### Are there differences in activity patterns between weekdays and weekends?
+``` {r, echo = TRUE}
+activity_data[,wkdy:=wday(DATETIME,  label = TRUE)]
+activity_data[wkdy %in% c("Sat", "Sun"),dayType:="Weekend"]
+activity_data[!wkdy %in% c("Sat", "Sun"),dayType:="Weekday"]
+MeanStepsByInterval_byDayType<- activity_data[, list(mean=mean(steps,na.rm=TRUE)), by = list(interval,dayType)]
+xyplot(mean ~ interval | dayType, data=MeanStepsByInterval_byDayType, type="l", xlim=c(0,2400),scales=list(x=list(at=seq(0,2400,200))),grid=TRUE,layout=c(1,2),ylab="Average Number of steps", xlab="5-minute intervals following midnight\nNote: Data only in first 60 minutes of each 100 minute interval", main="Average number of steps splitting Weekdays and Weekends\nby 5-minutes intervals with NAs Replaced")
+```
+
+The number of steps is concentrated in the morning for weekdays whereas the number of steps in any given interval is smaller on the weekends and is spread through normal daily hours.
